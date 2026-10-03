@@ -1,0 +1,79 @@
+@model BookAppointmentViewModel
+@{
+    ViewData["Title"] = "Book Appointment";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-calendar-check"></i> Book Appointment</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Doctor info -->
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                        <img src="@Model.ImagePath" alt="@Model.DoctorName" class="rounded-circle me-3 doctor-thumb" />
+                        <div>
+                            <h5 class="mb-0">@Model.DoctorName</h5>
+                            <span class="text-muted">@Model.Specialization</span>
+                        </div>
+                    </div>
+
+                    <form method="post" asp-action="Create">
+                        <input type="hidden" asp-for="DoctorId" />
+
+                        <div class="mb-3">
+                            <label asp-for="PatientName" class="form-label"></label>
+                            <input asp-for="PatientName" class="form-control" placeholder="Enter patient name" />
+                            <span asp-validation-for="PatientName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Date" class="form-label"></label>
+                            <input asp-for="Date" type="date" id="dateInput" class="form-control"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <div class="form-text">Available Sunday to Thursday only.</div>
+                            <span asp-validation-for="Date" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Time" class="form-label"></label>
+                            <select asp-for="Time" class="form-select">
+                                <option value="">-- Select a time --</option>
+                                @foreach (var slot in Model.TimeSlots)
+                                {
+                                    var label = DateTime.Today.Add(TimeSpan.Parse(slot)).ToString("h:mm tt");
+                                    <option value="@slot" selected="@(slot == Model.Time)">@label</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Time" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-circle"></i> Confirm Booking</button>
+                            <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-secondary">Back</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Block Friday (5) and Saturday (6) on the client side
+        const dateInput = document.getElementById('dateInput');
+        dateInput.addEventListener('change', function () {
+            const day = new Date(this.value + 'T00:00:00').getDay();
+            if (day === 5 || day === 6) {
+                this.setCustomValidity('Appointments are available Sunday to Thursday only.');
+                this.reportValidity();
+                this.value = '';
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
+}

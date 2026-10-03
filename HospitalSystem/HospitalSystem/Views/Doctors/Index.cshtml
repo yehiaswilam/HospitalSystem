@@ -1,0 +1,82 @@
+@model DoctorsViewModel
+@{
+    ViewData["Title"] = "Doctors";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="bi bi-people text-primary"></i> Our Doctors</h2>
+
+    <!-- Filters -->
+    <form method="get" asp-action="Index" class="card card-body shadow-sm mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label">Doctor Name</label>
+                <input type="text" name="name" value="@Model.Name" class="form-control" placeholder="Search by name..." />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Specialization</label>
+                <select name="specialization" class="form-select">
+                    <option value="">All specializations</option>
+                    @foreach (var s in Model.Specializations)
+                    {
+                        <option value="@s" selected="@(s == Model.Specialization)">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-funnel"></i> Filter</button>
+                <a asp-action="Index" class="btn btn-outline-secondary flex-fill">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Doctors list -->
+    @if (!Model.Doctors.Any())
+    {
+        <div class="alert alert-warning">No doctors found.</div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var d in Model.Doctors)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm doctor-card">
+                        <img src="@d.ImagePath" class="card-img-top doctor-img" alt="@d.Name" />
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-1">@d.Name</h5>
+                            <p class="text-muted mb-3"><i class="bi bi-heart-pulse text-danger"></i> @d.Specialization</p>
+                            <a asp-controller="Appointments" asp-action="Create" asp-route-doctorId="@d.Id" class="btn btn-primary w-100">
+                                <i class="bi bi-calendar-check"></i> Book Appointment
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)"
+                       asp-route-name="@Model.Name" asp-route-specialization="@Model.Specialization">Previous</a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i"
+                           asp-route-name="@Model.Name" asp-route-specialization="@Model.Specialization">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)"
+                       asp-route-name="@Model.Name" asp-route-specialization="@Model.Specialization">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
